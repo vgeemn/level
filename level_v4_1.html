@@ -240,6 +240,7 @@
     position: absolute;
     inset: 0;
     z-index: 10;
+    cursor: default;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -249,11 +250,12 @@
     pointer-events: all;
   }
 
-  .panel2-bg { position: absolute; inset: 0; }
+  .panel2-bg { position: absolute; inset: 0; background-size: cover; background-position: bottom center; }
   .panel2-bg img {
     width: 100%; height: 100%;
     object-fit: cover;
     object-position: bottom center;
+    display: none;
   }
   .panel2-bg-grad {
     position: absolute; inset: 0;
@@ -477,10 +479,28 @@ var clickTag5 = "https://level.ru/filter?cardType=vertical";
 
 var banner = document.getElementById('banner');
 var imgOverlay = document.getElementById('imgOverlay');
+var imgBase = banner.querySelector('.img-base');
+
+// Set images according to "Рендер/Фото" labels.
+// imgOverlay corresponds to the left ("Рендер"), imgBase to the right ("Фото").
+var renderSrc = "../.cursor/projects/c-Users-Downloads/assets/c__Users_________AppData_Roaming_Cursor_User_workspaceStorage_f46a859aedb0f388ea3b8832f29ea382_images_Render-e43360a7-b2c5-45d2-99a0-53c2254350c7.png";
+var photoSrc = "../.cursor/projects/c-Users-Downloads/assets/c__Users_________AppData_Roaming_Cursor_User_workspaceStorage_f46a859aedb0f388ea3b8832f29ea382_images_Photo-9bc707ee-1123-4aee-b7ab-4d9c2f1af838.png";
+if (imgBase && imgOverlay) {
+  imgOverlay.src = renderSrc;
+  imgBase.src = photoSrc;
+}
 var sliderLine = document.getElementById('sliderLine');
 var sliderHandle = document.getElementById('sliderHandle');
 var ctaBtn = document.getElementById('ctaBtn');
 var panel2 = document.getElementById('panel2');
+var panel2Bg = panel2 && panel2.querySelector('.panel2-bg');
+if (panel2Bg) {
+  var panel2BgImg = panel2Bg.querySelector('img');
+  if (panel2BgImg) panel2BgImg.style.display = 'none';
+  if (imgBase && imgBase.src) {
+    panel2Bg.style.backgroundImage = 'url(' + imgBase.src + ')';
+  }
+}
 var backBtn = document.getElementById('backBtn');
 var swipeHint = document.getElementById('swipeHint');
 var isDragging = false;
