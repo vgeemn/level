@@ -265,6 +265,15 @@
     );
   }
 
+  /* Base64 images are injected via level_banner_images.js */
+  #imgOverlay,
+  .img-base {
+    visibility: visible;
+  }
+  .panel2-bg img {
+    display: none;
+  }
+
   /* Same padding as screen 1 */
   .panel2-inner {
     position: relative;
@@ -468,6 +477,7 @@
   </div>
 
 </div>
+<script src="level_banner_images.js?v=20260325"></script>
 <script>
 var clickTag1 = "https://level.ru/premium/";
 var clickTag2 = "https://level.ru/filter/?realized_project=1";
@@ -479,32 +489,26 @@ var banner = document.getElementById('banner');
 var imgOverlay = document.getElementById('imgOverlay');
 var imgBase = banner.querySelector('.img-base');
 
+// Встраиваем base64-картинки прямо в код баннера (без assets/)
+imgOverlay.src = window.LEVEL_BANNER_RENDER_DATA_URI || imgOverlay.src;
+imgBase.src = window.LEVEL_BANNER_PHOTO_DATA_URI || imgBase.src;
+imgOverlay.style.visibility = 'visible';
+imgBase.style.visibility = 'visible';
+
 // Set images according to "Рендер/Фото" labels.
 // imgOverlay corresponds to the left ("Рендер"), imgBase to the right ("Фото").
 //
 // NOTE: deployment may change base path, so we try several candidates and
 // fall back to embedded base64 if external files are unavailable.
 var renderCandidates = [
-  "assets/Render-e43360a7-b2c5-45d2-99a0-53c2254350c7.png",
-  "./assets/Render-e43360a7-b2c5-45d2-99a0-53c2254350c7.png",
-  "../assets/Render-e43360a7-b2c5-45d2-99a0-53c2254350c7.png",
-  "/assets/Render-e43360a7-b2c5-45d2-99a0-53c2254350c7.png",
-  "../.cursor/projects/c-Users-Downloads/assets/c__Users_________AppData_Roaming_Cursor_User_workspaceStorage_f46a859aedb0f388ea3b8832f29ea382_images_Render-e43360a7-b2c5-45d2-99a0-53c2254350c7.png"
+  "assets/c__Users_________AppData_Roaming_Cursor_User_workspaceStorage_f46a859aedb0f388ea3b8832f29ea382_images_Render-109e6e6f-95b5-4ffe-a52c-bdd7f983e03f.png"
 ];
 var photoCandidates = [
-  "assets/Photo-9bc707ee-1123-4aee-b7ab-4d9c2f1af838.png",
-  "./assets/Photo-9bc707ee-1123-4aee-b7ab-4d9c2f1af838.png",
-  "../assets/Photo-9bc707ee-1123-4aee-b7ab-4d9c2f1af838.png",
-  "/assets/Photo-9bc707ee-1123-4aee-b7ab-4d9c2f1af838.png",
-  "../.cursor/projects/c-Users-Downloads/assets/c__Users_________AppData_Roaming_Cursor_User_workspaceStorage_f46a859aedb0f388ea3b8832f29ea382_images_Photo-9bc707ee-1123-4aee-b7ab-4d9c2f1af838.png"
+  "assets/c__Users_________AppData_Roaming_Cursor_User_workspaceStorage_f46a859aedb0f388ea3b8832f29ea382_images_Photo-6b31e5b9-9023-4692-aa24-04ed1d975527.png"
 ];
 
 function setSrcWithCandidates(img, candidates, onSuccess) {
   if (!img || !candidates || !candidates.length) return;
-  var originalSrc = img.src;
-  // Если исходник уже встроен как base64, то это "старый" вариант (fallback).
-  // Обнуляем, чтобы при любой проблеме загрузки не показывать base64-картинку.
-  if (originalSrc && originalSrc.indexOf('data:') === 0) originalSrc = '';
   var idx = 0;
   // Cache-busting: Гитхаб/браузер часто отдает старый вариант по тому же URL.
   // Добавляем уникальный параметр, чтобы картинка гарантированно перезагрузилась.
@@ -515,7 +519,8 @@ function setSrcWithCandidates(img, candidates, onSuccess) {
 
   function tryNext() {
     if (idx >= candidates.length) {
-      img.src = originalSrc;
+      // If none of candidates loaded, don't fall back to embedded base64.
+      img.src = '';
       return;
     }
     var candidate = candidates[idx++];
@@ -539,14 +544,14 @@ var ctaBtn = document.getElementById('ctaBtn');
 var panel2 = document.getElementById('panel2');
 var panel2Bg = panel2 && panel2.querySelector('.panel2-bg');
 var panel2BgImg = panel2Bg ? panel2Bg.querySelector('img') : null;
+if (panel2BgImg) panel2BgImg.style.display = 'none';
 function applyPanel2BgFromPhoto() {
   if (!panel2Bg || !imgBase || !imgBase.src) return;
   panel2Bg.style.backgroundImage = 'url(' + imgBase.src + ')';
   if (panel2BgImg) panel2BgImg.style.display = 'none';
 }
 
-setSrcWithCandidates(imgOverlay, renderCandidates);
-setSrcWithCandidates(imgBase, photoCandidates, applyPanel2BgFromPhoto);
+applyPanel2BgFromPhoto();
 var backBtn = document.getElementById('backBtn');
 var swipeHint = document.getElementById('swipeHint');
 var isDragging = false;
