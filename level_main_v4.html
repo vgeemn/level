@@ -490,7 +490,17 @@ var photoCandidates = [
 function setSrcWithCandidates(img, candidates, onSuccess) {
   if (!img || !candidates || !candidates.length) return;
   var originalSrc = img.src;
+  // Если исходник уже встроен как base64, то это "старый" вариант (fallback).
+  // Обнуляем, чтобы при любой проблеме загрузки не показывать base64-картинку.
+  if (originalSrc && originalSrc.indexOf('data:') === 0) originalSrc = '';
   var idx = 0;
+
+  // Cache-busting: Гитхаб/браузер часто отдает старый вариант по тому же URL.
+  // Добавляем уникальный параметр, чтобы картинка гарантированно перезагрузилась.
+  var cacheBuster = 'cb=' + Date.now();
+  function addCacheBuster(url) {
+    return url + (url.indexOf('?') === -1 ? '?' : '&') + cacheBuster;
+  }
 
   function tryNext() {
     if (idx >= candidates.length) {
@@ -498,15 +508,16 @@ function setSrcWithCandidates(img, candidates, onSuccess) {
       return;
     }
     var candidate = candidates[idx++];
+    var candidateUrl = addCacheBuster(candidate);
     var test = new Image();
     test.onload = function() {
-      img.src = candidate;
+      img.src = candidateUrl;
       if (onSuccess) onSuccess();
     };
     test.onerror = function() {
       tryNext();
     };
-    test.src = candidate;
+    test.src = candidateUrl;
   }
 
   tryNext();
